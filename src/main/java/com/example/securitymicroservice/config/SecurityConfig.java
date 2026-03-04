@@ -1,7 +1,7 @@
 package com.example.securitymicroservice.config;
 
 import com.example.securitymicroservice.user.repository.AppUserRepository;
-import com.example.securitymicroservice.user.util.Permission;
+import com.example.securitymicroservice.user.entity.Authority;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -50,11 +50,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/actuator/health").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/items/**").hasAuthority(Permission.DATA_READ.name())
-                        .requestMatchers(HttpMethod.POST, "/api/items/**").hasAuthority(Permission.DATA_CREATE.name())
-                        .requestMatchers(HttpMethod.PUT, "/api/items/**").hasAuthority(Permission.DATA_UPDATE.name())
-                        .requestMatchers(HttpMethod.PATCH, "/api/items/**").hasAuthority(Permission.DATA_UPDATE.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/items/**").hasAuthority(Permission.DATA_DELETE.name())
+                        .requestMatchers(HttpMethod.GET, "/api/items/**").hasAuthority(Authority.DATA_READ.name())
+                        .requestMatchers(HttpMethod.POST, "/api/items/**").hasAuthority(Authority.DATA_CREATE.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/items/**").hasAuthority(Authority.DATA_UPDATE.name())
+                        .requestMatchers(HttpMethod.PATCH, "/api/items/**").hasAuthority(Authority.DATA_UPDATE.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/items/**").hasAuthority(Authority.DATA_DELETE.name())
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
@@ -80,19 +80,18 @@ public class SecurityConfig {
         return converter;
     }
 
-    /** Loads users and expands role + direct permissions into effective authorities. */
+    /** Loads users and expands role authorities into effective authorities. */
     @Bean
     UserDetailsService userDetailsService(AppUserRepository appUserRepository) {
         return username -> appUserRepository.findByUsername(username)
                 .map(user -> {
                     Set<GrantedAuthority> authorities = new HashSet<>();
-                    authorities.addAll(user.getRole().getAuthorities().stream()
-                            .map(a -> new SimpleGrantedAuthority(a.getName()))
-                            .toList());
-                    authorities.addAll(user.getAuthorities().stream()
-                            .map(a -> new SimpleGrantedAuthority(a.getName()))
-                            .toList());
-                    authorities.add(new SimpleGrantedAuthority(user.getRole().authorityName()));
+                    user.getRoles().forEach(role -> {
+                        authorities.add(new SimpleGrantedAuthority(role.authorityName()));
+                        authorities.addAll(role.getAuthorities().stream()
+                                .map(authority -> new SimpleGrantedAuthority(authority.name()))
+                                .toList());
+                    });
 
                     UserDetails details = User.withUsername(user.getUsername())
                             .password(user.getPasswordHash())

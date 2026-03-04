@@ -9,7 +9,7 @@ This educational backend service demonstrates a complete baseline authentication
 - **Username/password authentication** for users.
 - **JWT token issuance** (HS256) after successful login.
 - **Permission checks** on both HTTP endpoint and service layers.
-- **RBAC + granular permissions** model (role-based + fine-grained authorities).
+- **RBAC + granular permissions** model (roles with authority sets).
 - **Database schema management with Flyway** using versioned SQL migrations.
 
 ### Main request flow
@@ -22,15 +22,12 @@ This educational backend service demonstrates a complete baseline authentication
 
 ## Security model
 
-- Each user has **one primary role** (`CUSTOMER`, `BUSINESS`, `ADMIN`).
-- The role provides a **base set of permissions** via `role_authority`.
-- Additional (or overriding) permissions can be assigned **directly to users** via `user_authority`.
+- Each user can have a **set of roles** (`CUSTOMER`, `BUSINESS`, `ADMIN`).
+- Each role stores a **set of authorities** (`DATA_READ`, `DATA_UPDATE`, `DATA_CREATE`, `DATA_DELETE`).
+- Effective user access is calculated only from assigned roles and their authority sets.
 - JWT contains aggregated authorities:
-  - `ROLE_*` value for the role;
-  - permissions inherited from the role;
-  - permissions assigned directly to the user.
-
-This design combines classic RBAC and permission-based access for flexibility.
+  - all `ROLE_*` values for assigned roles;
+  - all authorities inherited from those roles.
 
 ## Tech stack
 
@@ -49,20 +46,12 @@ This design combines classic RBAC and permission-based access for flexibility.
 - Permission-based protection for `/api/items/**`.
 - Service-level protection via `@PreAuthorize`.
 - Flyway migrations:
-  - schema creation (`app_user`, `role`, `authority`, `role_authority`, `user_authority`, `item`)
+  - schema creation (`app_user`, `role`, `role_authority`, `user_role`, `item`)
   - seed users/authorities/items.
 
 ## Database structure
 
-### 1) `authority`
-Permission dictionary (atomic access rights).
-
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Technical permission identifier |
-| `name` | `VARCHAR(50)` | `UNIQUE`, `NOT NULL` | Permission name (`DATA_READ`, `DATA_UPDATE`, ...) |
-
-### 2) `role`
+### 1) `role`
 User role dictionary.
 
 | Column | Type | Constraints | Description |
@@ -70,17 +59,17 @@ User role dictionary.
 | `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Role ID |
 | `name` | `VARCHAR(30)` | `UNIQUE`, `NOT NULL` | Role name (`CUSTOMER`, `BUSINESS`, `ADMIN`) |
 
-### 3) `role_authority`
-Many-to-many relation: role → permission.
+### 2) `role_authority`
+Many-to-many relation: role → authority enum value.
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | `role_id` | `BIGINT` | `PK`, `FK -> role(id)`, `NOT NULL` | Role |
-| `authority_id` | `BIGINT` | `PK`, `FK -> authority(id)`, `NOT NULL` | Permission |
+| `authority` | `VARCHAR(50)` | `PK`, `NOT NULL` | Authority (`DATA_READ`, `DATA_UPDATE`, ...) |
 
 Notes:
-- Composite PK (`role_id`, `authority_id`) prevents duplicates.
-- `ON DELETE CASCADE` on both FKs cleans up links automatically.
+- Composite PK (`role_id`, `authority`) prevents duplicates.
+- `ON DELETE CASCADE` keeps links in sync when roles are removed.
 
 ### 4) `app_user`
 System users table.
@@ -90,17 +79,17 @@ System users table.
 | `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | User ID |
 | `username` | `VARCHAR(100)` | `UNIQUE`, `NOT NULL` | Login name |
 | `password_hash` | `VARCHAR(200)` | `NOT NULL` | BCrypt password hash |
-| `role_id` | `BIGINT` | `FK -> role(id)`, `NOT NULL` | Primary role |
 
-### 5) `user_authority`
-Many-to-many relation: user → permission.
+
+### 4) `user_role`
+Many-to-many relation: user → role.
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | `user_id` | `BIGINT` | `PK`, `FK -> app_user(id)`, `NOT NULL` | User |
-| `authority_id` | `BIGINT` | `PK`, `FK -> authority(id)`, `NOT NULL` | Personal permission |
+| `role_id` | `BIGINT` | `PK`, `FK -> role(id)`, `NOT NULL` | Assigned role |
 
-### 6) `item`
+### 5) `item`
 Demo business entity protected by permissions.
 
 | Column | Type | Constraints | Description |
@@ -114,7 +103,6 @@ Demo business entity protected by permissions.
 
 Migration `V2__seed.sql` inserts:
 
-- permissions: `DATA_READ`, `DATA_UPDATE`, `DATA_CREATE`, `DATA_DELETE`;
 - roles: `CUSTOMER`, `BUSINESS`, `ADMIN`;
 - users:
   - `customer1 / Password123!`
@@ -136,9 +124,8 @@ Role defaults:
 - `ADMIN`: READ + UPDATE + CREATE + DELETE
 
 Effective user authorities are composed from:
-1. role permissions (`role` + `role_authority`)
-2. extra user permissions (`user_authority`)
-3. role as `ROLE_*`
+1. all assigned roles (`user_role`) as `ROLE_*`
+2. all role authorities (`role_authority`)
 
 ## Quick start
 

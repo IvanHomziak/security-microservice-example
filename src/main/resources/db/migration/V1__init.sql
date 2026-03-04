@@ -1,8 +1,3 @@
-CREATE TABLE authority (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) UNIQUE NOT NULL
-);
-
 CREATE TABLE role (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(30) UNIQUE NOT NULL
@@ -10,26 +5,23 @@ CREATE TABLE role (
 
 CREATE TABLE role_authority (
     role_id BIGINT NOT NULL,
-    authority_id BIGINT NOT NULL,
-    PRIMARY KEY (role_id, authority_id),
-    CONSTRAINT fk_role_authority_role FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE,
-    CONSTRAINT fk_role_authority_authority FOREIGN KEY (authority_id) REFERENCES authority(id) ON DELETE CASCADE
+    authority VARCHAR(50) NOT NULL,
+    PRIMARY KEY (role_id, authority),
+    CONSTRAINT fk_role_authority_role FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE
 );
 
 CREATE TABLE app_user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(200) NOT NULL,
-    role_id BIGINT NOT NULL,
-    CONSTRAINT fk_app_user_role FOREIGN KEY (role_id) REFERENCES role(id)
+    password_hash VARCHAR(200) NOT NULL
 );
 
-CREATE TABLE user_authority (
+CREATE TABLE user_role (
     user_id BIGINT NOT NULL,
-    authority_id BIGINT NOT NULL,
-    PRIMARY KEY (user_id, authority_id),
-    CONSTRAINT fk_user_authority_user FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE,
-    CONSTRAINT fk_user_authority_authority FOREIGN KEY (authority_id) REFERENCES authority(id) ON DELETE CASCADE
+    role_id BIGINT NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    CONSTRAINT fk_user_role_user FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_role_role FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE
 );
 
 CREATE TABLE item (

@@ -1,13 +1,16 @@
 package com.example.securitymicroservice.user.entity;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 import java.util.HashSet;
@@ -24,12 +27,10 @@ public class Role {
     @Column(nullable = false, unique = true, length = 30)
     private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "role_authority",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "authority_id")
-    )
+    @ElementCollection(fetch = FetchType.EAGER, targetClass = Authority.class)
+    @CollectionTable(name = "role_authority", joinColumns = @JoinColumn(name = "role_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "authority", nullable = false, length = 50)
     private Set<Authority> authorities = new HashSet<>();
 
     public Long getId() {
