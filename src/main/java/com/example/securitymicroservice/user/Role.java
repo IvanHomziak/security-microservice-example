@@ -1,23 +1,50 @@
 package com.example.securitymicroservice.user;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+
+import java.util.HashSet;
 import java.util.Set;
 
-public enum Role {
-    CUSTOMER(Set.of(Permission.DATA_READ)),
-    BUSINESS(Set.of(Permission.DATA_READ, Permission.DATA_UPDATE)),
-    ADMIN(Set.of(Permission.DATA_READ, Permission.DATA_UPDATE, Permission.DATA_CREATE, Permission.DATA_DELETE));
+@Entity
+@Table(name = "role")
+public class Role {
 
-    private final Set<Permission> permissions;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    Role(Set<Permission> permissions) {
-        this.permissions = permissions;
+    @Column(nullable = false, unique = true, length = 30)
+    private String name;
+
+    @ManyToMany
+    @JoinTable(
+            name = "role_authority",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "authority_id")
+    )
+    private Set<Authority> authorities = new HashSet<>();
+
+    public Long getId() {
+        return id;
     }
 
-    public Set<Permission> permissions() {
-        return permissions;
+    public String getName() {
+        return name;
+    }
+
+    public Set<Authority> getAuthorities() {
+        return authorities;
     }
 
     public String authorityName() {
-        return "ROLE_" + name();
+        return "ROLE_" + name;
     }
 }

@@ -82,9 +82,8 @@ public class SecurityConfig {
         return username -> appUserRepository.findByUsername(username)
                 .map(user -> {
                     Set<GrantedAuthority> authorities = new HashSet<>();
-                    authorities.addAll(user.getRole().permissions().stream()
-                            .map(Permission::name)
-                            .map(SimpleGrantedAuthority::new)
+                    authorities.addAll(user.getRole().getAuthorities().stream()
+                            .map(a -> new SimpleGrantedAuthority(a.getName()))
                             .toList());
                     authorities.addAll(user.getAuthorities().stream()
                             .map(a -> new SimpleGrantedAuthority(a.getName()))

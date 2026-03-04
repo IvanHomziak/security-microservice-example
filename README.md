@@ -1,6 +1,6 @@
 # Security Microservice Example (Spring Boot 3 + Spring Security 6)
 
-Демо-проєкт зі stateless JWT-auth + permission-based authorization, PostgreSQL, Flyway та Docker Compose.
+Демо-проєкт зі stateless JWT-auth + permission-based authorization, MySQL, Flyway та Docker Compose.
 
 ## Stack
 
@@ -8,7 +8,7 @@
 - Maven
 - Spring Boot 3.x
 - Spring Security 6 (Resource Server + JWT)
-- PostgreSQL
+- MySQL
 - Flyway
 
 ## Що реалізовано
@@ -18,7 +18,7 @@
 - Permission-based доступ до `/api/items/**`
 - Service-layer захист через `@PreAuthorize`
 - Flyway міграції:
-  - створення схеми (`app_user`, `authority`, `user_authority`, `item`)
+  - створення схеми (`app_user`, `role`, `authority`, `role_authority`, `user_authority`, `item`)
   - seed users/authorities/items
 
 ## Ролі та permissions
@@ -35,8 +35,8 @@ Roles:
 - `ADMIN`: READ + UPDATE + CREATE + DELETE
 
 Ефективні authorities користувача формуються як:
-1. baseline permissions із `role`
-2. permissions із таблиці `user_authority`
+1. permissions із таблиці ролі (`role` + `role_authority`)
+2. додаткові permissions із таблиці `user_authority`
 3. роль як `ROLE_*`
 
 ## Швидкий старт
