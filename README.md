@@ -152,7 +152,7 @@ By default, the service now uses an in-memory H2 database in MySQL compatibility
 
 ### Option B: Run with MySQL (Docker Compose)
 
-1. Start MySQL:
+1. Start MySQL manually (recommended for first run):
 
 ```bash
 docker compose up -d
@@ -164,6 +164,15 @@ docker compose up -d
 
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=mysql
+```
+
+When Docker is available, Spring Boot can also manage `docker compose` automatically (via `spring-boot-docker-compose`) so the MySQL container is started for you.
+
+You can override connection values when needed:
+
+```bash
+MYSQL_HOST=localhost MYSQL_PORT=3307 MYSQL_DATABASE=appdb MYSQL_USERNAME=app MYSQL_PASSWORD=app \
+  mvn spring-boot:run -Dspring-boot.run.profiles=mysql
 ```
 
 Flyway will apply migrations on startup (if schema is not initialized).
