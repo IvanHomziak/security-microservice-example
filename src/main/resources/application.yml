@@ -30,6 +30,9 @@ spring:
   config:
     activate:
       on-profile: mysql
+  flyway:
+    baseline-on-migrate: true
+    baseline-version:
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3307}/${MYSQL_DATABASE:appdb}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: ${MYSQL_USERNAME:app}
