@@ -1,5 +1,10 @@
-package com.example.securitymicroservice.item;
+package com.example.securitymicroservice.item.service;
 
+import com.example.securitymicroservice.item.entity.Item;
+import com.example.securitymicroservice.item.dto.ItemCreateRequest;
+import com.example.securitymicroservice.item.dto.ItemResponse;
+import com.example.securitymicroservice.item.dto.ItemUpdateRequest;
+import com.example.securitymicroservice.item.repository.ItemRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.example.securitymicroservice.user;
+package com.example.securitymicroservice.user.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

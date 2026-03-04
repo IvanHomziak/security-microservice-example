@@ -1,5 +1,9 @@
-package com.example.securitymicroservice.auth;
+package com.example.securitymicroservice.auth.controller;
 
+import com.example.securitymicroservice.auth.service.AuthService;
+import com.example.securitymicroservice.auth.dto.LoginRequest;
+import com.example.securitymicroservice.auth.dto.LoginResponse;
+import com.example.securitymicroservice.auth.dto.MeResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

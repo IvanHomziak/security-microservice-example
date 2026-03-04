@@ -1,4 +1,4 @@
-package com.example.securitymicroservice.user;
+package com.example.securitymicroservice.user.util;
 
 public enum Permission {
     DATA_READ,

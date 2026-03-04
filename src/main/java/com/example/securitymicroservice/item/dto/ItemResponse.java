@@ -1,4 +1,6 @@
-package com.example.securitymicroservice.item;
+package com.example.securitymicroservice.item.dto;
+
+import com.example.securitymicroservice.item.entity.Item;
 
 import java.time.LocalDateTime;
 

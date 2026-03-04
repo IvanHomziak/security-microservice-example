@@ -1,5 +1,6 @@
-package com.example.securitymicroservice.user;
+package com.example.securitymicroservice.user.repository;
 
+import com.example.securitymicroservice.user.entity.AppUser;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 

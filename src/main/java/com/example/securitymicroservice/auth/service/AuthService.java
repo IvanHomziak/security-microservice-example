@@ -1,5 +1,7 @@
-package com.example.securitymicroservice.auth;
+package com.example.securitymicroservice.auth.service;
 
+import com.example.securitymicroservice.auth.dto.LoginRequest;
+import com.example.securitymicroservice.auth.dto.LoginResponse;
 import com.example.securitymicroservice.config.JwtProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

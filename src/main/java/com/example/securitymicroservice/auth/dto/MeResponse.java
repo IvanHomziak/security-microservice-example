@@ -1,4 +1,4 @@
-package com.example.securitymicroservice.auth;
+package com.example.securitymicroservice.auth.dto;
 
 import java.util.List;
 

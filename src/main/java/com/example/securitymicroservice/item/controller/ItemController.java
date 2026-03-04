@@ -1,5 +1,9 @@
-package com.example.securitymicroservice.item;
+package com.example.securitymicroservice.item.controller;
 
+import com.example.securitymicroservice.item.service.ItemService;
+import com.example.securitymicroservice.item.dto.ItemCreateRequest;
+import com.example.securitymicroservice.item.dto.ItemResponse;
+import com.example.securitymicroservice.item.dto.ItemUpdateRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

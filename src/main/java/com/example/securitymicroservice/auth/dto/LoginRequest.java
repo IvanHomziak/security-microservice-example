@@ -1,4 +1,4 @@
-package com.example.securitymicroservice.auth;
+package com.example.securitymicroservice.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

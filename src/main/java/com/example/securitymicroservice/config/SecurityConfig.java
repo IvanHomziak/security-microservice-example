@@ -1,7 +1,7 @@
 package com.example.securitymicroservice.config;
 
-import com.example.securitymicroservice.user.AppUserRepository;
-import com.example.securitymicroservice.user.Permission;
+import com.example.securitymicroservice.user.repository.AppUserRepository;
+import com.example.securitymicroservice.user.util.Permission;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
