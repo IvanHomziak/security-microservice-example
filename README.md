@@ -41,7 +41,7 @@ Roles:
 
 ## Швидкий старт
 
-1. Підняти БД (під час першого старту MySQL автоматично створить усі таблиці з `docker/mysql/init/001_create_tables.sql`):
+1. Підняти БД (під час першого старту MySQL автоматично створить таблиці з `docker/mysql/init/001_create_tables.sql` та одразу заповнить їх стартовими даними з `docker/mysql/init/002_seed_data.sql`):
 
 ```bash
 docker compose up -d
@@ -55,7 +55,7 @@ docker compose up -d
 mvn spring-boot:run
 ```
 
-Після старту Flyway автоматично застосує міграції та seed.
+Після старту Flyway застосує міграції застосунку (якщо схема ще не ініціалізована).
 
 ## Тестування API через curl
 
