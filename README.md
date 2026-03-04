@@ -38,7 +38,8 @@ This design combines classic RBAC and permission-based access for flexibility.
 - Maven
 - Spring Boot 3.x
 - Spring Security 6 (Resource Server + JWT)
-- MySQL
+- H2 (default local profile)
+- MySQL (for docker/production-like setup)
 - Flyway
 
 ## Implemented features
@@ -141,6 +142,16 @@ Effective user authorities are composed from:
 
 ## Quick start
 
+### Option A: Run locally without MySQL (default)
+
+```bash
+mvn spring-boot:run
+```
+
+By default, the service now uses an in-memory H2 database in MySQL compatibility mode, so Flyway migrations and seed data are applied automatically at startup.
+
+### Option B: Run with MySQL (Docker Compose)
+
 1. Start MySQL:
 
 ```bash
@@ -149,10 +160,10 @@ docker compose up -d
 
 > If `mysql_data` volume already exists, init scripts are not re-run. Use `docker compose down -v` and start again for full re-initialization.
 
-2. Run the application:
+2. Run the application with the `mysql` profile:
 
 ```bash
-mvn spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.profiles=mysql
 ```
 
 Flyway will apply migrations on startup (if schema is not initialized).
