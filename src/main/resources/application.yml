@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/appdb
+    url: jdbc:mysql://localhost:3307/appdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: app
     password: app
   jpa:
