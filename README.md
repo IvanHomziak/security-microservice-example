@@ -1,38 +1,38 @@
 # Security Microservice Example (Spring Boot 3 + Spring Security 6)
 
-Демо-проєкт мікросервісу безпеки зі stateless JWT-auth + permission-based authorization, MySQL, Flyway та Docker Compose.
+A demo security-focused microservice that showcases stateless JWT authentication, permission-based authorization, MySQL persistence, Flyway migrations, and Docker Compose setup.
 
-## Детальний опис проєкту
+## Project overview
 
-Це навчальний backend-сервіс, який демонструє повний базовий цикл авторизації й контролю доступу:
+This educational backend service demonstrates a complete baseline authentication and access-control flow:
 
-- **автентифікація** користувача через `username/password`;
-- **видача JWT-токена** (HS256) після успішного логіну;
-- **перевірка прав доступу** на рівні HTTP endpoint-ів та service-layer;
-- **RBAC + permissions модель** (роль + granular permissions);
-- **керування схемою БД через Flyway** з версіонованими міграціями.
+- **Username/password authentication** for users.
+- **JWT token issuance** (HS256) after successful login.
+- **Permission checks** on both HTTP endpoint and service layers.
+- **RBAC + granular permissions** model (role-based + fine-grained authorities).
+- **Database schema management with Flyway** using versioned SQL migrations.
 
-### Ключові сценарії
+### Main request flow
 
-1. Клієнт викликає `POST /auth/login` з логіном і паролем.
-2. Сервіс перевіряє облікові дані та повертає JWT.
-3. Клієнт додає токен в `Authorization: Bearer <token>`.
-4. Сервіс витягує authorities з токена та вирішує, чи дозволена операція.
-5. Доступ до `items` відкривається/блокується залежно від permission (`DATA_READ`, `DATA_UPDATE`, `DATA_CREATE`, `DATA_DELETE`).
+1. Client calls `POST /auth/login` with credentials.
+2. Service validates credentials and returns a JWT access token.
+3. Client sends the token via `Authorization: Bearer <token>`.
+4. Service extracts authorities from the JWT and evaluates access rules.
+5. Access to `/api/items/**` is granted/denied by permission (`DATA_READ`, `DATA_UPDATE`, `DATA_CREATE`, `DATA_DELETE`).
 
-### Логіка безпеки
+## Security model
 
-- Кожен користувач має **одну роль** (`CUSTOMER`, `BUSINESS`, `ADMIN`).
-- Роль дає **базовий набір permissions** через зв'язку `role_authority`.
-- Додаткові (або дублюючі) права можуть задаватися **безпосередньо користувачу** через `user_authority`.
-- У JWT потрапляє агрегований список authorities:
-  - `ROLE_*` (роль користувача);
-  - permissions з ролі;
-  - персональні permissions користувача.
+- Each user has **one primary role** (`CUSTOMER`, `BUSINESS`, `ADMIN`).
+- The role provides a **base set of permissions** via `role_authority`.
+- Additional (or overriding) permissions can be assigned **directly to users** via `user_authority`.
+- JWT contains aggregated authorities:
+  - `ROLE_*` value for the role;
+  - permissions inherited from the role;
+  - permissions assigned directly to the user.
 
-Таким чином проєкт показує комбінацію Role-Based Access Control (RBAC) і permission-based моделі для більш гнучкого керування доступом.
+This design combines classic RBAC and permission-based access for flexibility.
 
-## Stack
+## Tech stack
 
 - Java 21
 - Maven
@@ -41,107 +41,87 @@
 - MySQL
 - Flyway
 
-## Що реалізовано
+## Implemented features
 
-- `POST /auth/login` — логін через username/password, повертає JWT (HS256)
-- `GET /auth/me` — показує username та authorities з токена
-- Permission-based доступ до `/api/items/**`
-- Service-layer захист через `@PreAuthorize`
-- Flyway міграції:
-  - створення схеми (`app_user`, `role`, `authority`, `role_authority`, `user_authority`, `item`)
-  - seed users/authorities/items
+- `POST /auth/login` — login by username/password, returns HS256 JWT.
+- `GET /auth/me` — returns current username and authorities from token.
+- Permission-based protection for `/api/items/**`.
+- Service-level protection via `@PreAuthorize`.
+- Flyway migrations:
+  - schema creation (`app_user`, `role`, `authority`, `role_authority`, `user_authority`, `item`)
+  - seed users/authorities/items.
 
-## Опис структури БД (детально)
-
-Нижче — таблиці, які створюються міграцією `V1__init.sql`, та їх призначення.
+## Database structure
 
 ### 1) `authority`
+Permission dictionary (atomic access rights).
 
-Довідник permissions (атомарних прав).
-
-| Колонка | Тип | Обмеження | Опис |
+| Column | Type | Constraints | Description |
 |---|---|---|---|
-| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Технічний ідентифікатор permission |
-| `name` | `VARCHAR(50)` | `UNIQUE`, `NOT NULL` | Назва permission (`DATA_READ`, `DATA_UPDATE`, ...) |
-
-**Призначення:** зберігає список усіх доступних дозволів у системі.
+| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Technical permission identifier |
+| `name` | `VARCHAR(50)` | `UNIQUE`, `NOT NULL` | Permission name (`DATA_READ`, `DATA_UPDATE`, ...) |
 
 ### 2) `role`
+User role dictionary.
 
-Довідник ролей користувачів.
-
-| Колонка | Тип | Обмеження | Опис |
+| Column | Type | Constraints | Description |
 |---|---|---|---|
-| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Ідентифікатор ролі |
-| `name` | `VARCHAR(30)` | `UNIQUE`, `NOT NULL` | Назва ролі (`CUSTOMER`, `BUSINESS`, `ADMIN`) |
-
-**Призначення:** визначає верхньорівневу категорію доступу користувача.
+| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Role ID |
+| `name` | `VARCHAR(30)` | `UNIQUE`, `NOT NULL` | Role name (`CUSTOMER`, `BUSINESS`, `ADMIN`) |
 
 ### 3) `role_authority`
+Many-to-many relation: role → permission.
 
-Зв’язувальна таблиця "роль → permission" (many-to-many).
-
-| Колонка | Тип | Обмеження | Опис |
+| Column | Type | Constraints | Description |
 |---|---|---|---|
-| `role_id` | `BIGINT` | `PK`, `FK -> role(id)`, `NOT NULL` | Роль |
+| `role_id` | `BIGINT` | `PK`, `FK -> role(id)`, `NOT NULL` | Role |
 | `authority_id` | `BIGINT` | `PK`, `FK -> authority(id)`, `NOT NULL` | Permission |
 
-**Особливості:**
-- композитний первинний ключ (`role_id`, `authority_id`) унеможливлює дублікати;
-- `ON DELETE CASCADE` для обох FK — видалення ролі/permission очищає зв'язки.
+Notes:
+- Composite PK (`role_id`, `authority_id`) prevents duplicates.
+- `ON DELETE CASCADE` on both FKs cleans up links automatically.
 
 ### 4) `app_user`
+System users table.
 
-Таблиця користувачів системи.
-
-| Колонка | Тип | Обмеження | Опис |
+| Column | Type | Constraints | Description |
 |---|---|---|---|
-| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Ідентифікатор користувача |
-| `username` | `VARCHAR(100)` | `UNIQUE`, `NOT NULL` | Логін |
-| `password_hash` | `VARCHAR(200)` | `NOT NULL` | BCrypt-хеш пароля |
-| `role_id` | `BIGINT` | `FK -> role(id)`, `NOT NULL` | Основна роль користувача |
-
-**Призначення:** зберігає облікові записи та їх базову роль.
+| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | User ID |
+| `username` | `VARCHAR(100)` | `UNIQUE`, `NOT NULL` | Login name |
+| `password_hash` | `VARCHAR(200)` | `NOT NULL` | BCrypt password hash |
+| `role_id` | `BIGINT` | `FK -> role(id)`, `NOT NULL` | Primary role |
 
 ### 5) `user_authority`
+Many-to-many relation: user → permission.
 
-Зв’язувальна таблиця "користувач → permission" (many-to-many).
-
-| Колонка | Тип | Обмеження | Опис |
+| Column | Type | Constraints | Description |
 |---|---|---|---|
-| `user_id` | `BIGINT` | `PK`, `FK -> app_user(id)`, `NOT NULL` | Користувач |
-| `authority_id` | `BIGINT` | `PK`, `FK -> authority(id)`, `NOT NULL` | Персональне permission |
-
-**Особливості:**
-- дозволяє видавати granular права поверх ролі;
-- `ON DELETE CASCADE` на обох FK автоматично очищає зв’язки.
+| `user_id` | `BIGINT` | `PK`, `FK -> app_user(id)`, `NOT NULL` | User |
+| `authority_id` | `BIGINT` | `PK`, `FK -> authority(id)`, `NOT NULL` | Personal permission |
 
 ### 6) `item`
+Demo business entity protected by permissions.
 
-Демо-сутність для перевірки контролю доступу.
-
-| Колонка | Тип | Обмеження | Опис |
+| Column | Type | Constraints | Description |
 |---|---|---|---|
-| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Ідентифікатор запису |
-| `name` | `VARCHAR(120)` | `NOT NULL` | Назва об’єкта |
-| `description` | `TEXT` | `NULL` | Опис |
-| `updated_at` | `TIMESTAMP` | `NOT NULL`, `DEFAULT CURRENT_TIMESTAMP` | Час останнього оновлення |
+| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Item ID |
+| `name` | `VARCHAR(120)` | `NOT NULL` | Item name |
+| `description` | `TEXT` | `NULL` | Item description |
+| `updated_at` | `TIMESTAMP` | `NOT NULL`, `DEFAULT CURRENT_TIMESTAMP` | Last update timestamp |
 
-**Призначення:** приклад бізнес-таблиці, доступ до якої обмежується permissions.
+## Seed data
 
-### Початкові дані (seed)
-
-Міграція `V2__seed.sql` створює:
+Migration `V2__seed.sql` inserts:
 
 - permissions: `DATA_READ`, `DATA_UPDATE`, `DATA_CREATE`, `DATA_DELETE`;
-- ролі: `CUSTOMER`, `BUSINESS`, `ADMIN`;
-- користувачів:
+- roles: `CUSTOMER`, `BUSINESS`, `ADMIN`;
+- users:
   - `customer1 / Password123!`
   - `business1 / Business123!`
   - `admin1 / Admin123!`
-- тестові записи в `item` (`Laptop`, `Phone`, `Desk`).
+- demo items: `Laptop`, `Phone`, `Desk`.
 
-## Ролі та permissions
+## Roles and permissions matrix
 
 Permissions:
 - `DATA_READ`
@@ -149,37 +129,37 @@ Permissions:
 - `DATA_CREATE`
 - `DATA_DELETE`
 
-Roles:
+Role defaults:
 - `CUSTOMER`: READ
 - `BUSINESS`: READ + UPDATE
 - `ADMIN`: READ + UPDATE + CREATE + DELETE
 
-Ефективні authorities користувача формуються як:
-1. permissions із таблиці ролі (`role` + `role_authority`)
-2. додаткові permissions із таблиці `user_authority`
-3. роль як `ROLE_*`
+Effective user authorities are composed from:
+1. role permissions (`role` + `role_authority`)
+2. extra user permissions (`user_authority`)
+3. role as `ROLE_*`
 
-## Швидкий старт
+## Quick start
 
-1. Підняти БД (під час першого старту MySQL автоматично створить таблиці з `docker/mysql/init/001_create_tables.sql` та одразу заповнить їх стартовими даними з `docker/mysql/init/002_seed_data.sql`):
+1. Start MySQL:
 
 ```bash
 docker compose up -d
 ```
 
-> Якщо volume `mysql_data` уже існує, init-скрипти не перезапускаються. Для повторної ініціалізації виконайте `docker compose down -v` і підніміть контейнери знову.
+> If `mysql_data` volume already exists, init scripts are not re-run. Use `docker compose down -v` and start again for full re-initialization.
 
-2. Запустити застосунок:
+2. Run the application:
 
 ```bash
 mvn spring-boot:run
 ```
 
-Після старту Flyway застосує міграції застосунку (якщо схема ще не ініціалізована).
+Flyway will apply migrations on startup (if schema is not initialized).
 
-## Тестування API через curl
+## API testing with curl
 
-### Отримати токен у змінну
+### Get a token
 
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
@@ -189,18 +169,16 @@ TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
 echo "$TOKEN"
 ```
 
-Використання:
+### Use token
 
 ```bash
 curl -i http://localhost:8080/api/items \
   -H "Authorization: Bearer $TOKEN"
 ```
 
----
+## Access examples
 
-## Матриця доступів
-
-### A) `customer1 / Password123!`
+### `customer1 / Password123!`
 
 ```bash
 # login
@@ -209,8 +187,7 @@ curl -s -X POST http://localhost:8080/auth/login \
   -d '{"username":"customer1","password":"Password123!"}'
 
 # GET -> 200
-curl -i http://localhost:8080/api/items \
-  -H "Authorization: Bearer $TOKEN"
+curl -i http://localhost:8080/api/items -H "Authorization: Bearer $TOKEN"
 
 # PUT -> 403
 curl -i -X PUT http://localhost:8080/api/items/1 \
@@ -225,11 +202,10 @@ curl -i -X POST http://localhost:8080/api/items \
   -d '{"name":"New item","description":"no rights"}'
 
 # DELETE -> 403
-curl -i -X DELETE http://localhost:8080/api/items/1 \
-  -H "Authorization: Bearer $TOKEN"
+curl -i -X DELETE http://localhost:8080/api/items/1 -H "Authorization: Bearer $TOKEN"
 ```
 
-### B) `business1 / Business123!`
+### `business1 / Business123!`
 
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
@@ -245,52 +221,20 @@ curl -i -X PUT http://localhost:8080/api/items/1 \
   -H 'Content-Type: application/json' \
   -d '{"name":"Updated by business","description":"allowed"}'
 
-# PATCH -> 200
-curl -i -X PATCH http://localhost:8080/api/items/1 \
-  -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"description":"patched by business"}'
-
 # POST -> 403
 curl -i -X POST http://localhost:8080/api/items \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"name":"Denied create","description":"should be forbidden"}'
-
-# DELETE -> 403
-curl -i -X DELETE http://localhost:8080/api/items/1 \
-  -H "Authorization: Bearer $TOKEN"
+  -d '{"name":"New item","description":"not allowed"}'
 ```
 
-### C) `admin1 / Admin123!`
+### `admin1 / Admin123!`
 
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"username":"admin1","password":"Admin123!"}' | jq -r .accessToken)
 
-# GET -> 200
+# GET / POST / PUT / DELETE -> allowed
 curl -i http://localhost:8080/api/items -H "Authorization: Bearer $TOKEN"
-
-# POST -> 200
-curl -i -X POST http://localhost:8080/api/items \
-  -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"Admin created","description":"ok"}'
-
-# PUT -> 200
-curl -i -X PUT http://localhost:8080/api/items/1 \
-  -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"Admin updated","description":"ok"}'
-
-# PATCH -> 200
-curl -i -X PATCH http://localhost:8080/api/items/1 \
-  -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"description":"admin patch"}'
-
-# DELETE -> 204
-curl -i -X DELETE http://localhost:8080/api/items/1 \
-  -H "Authorization: Bearer $TOKEN"
 ```
