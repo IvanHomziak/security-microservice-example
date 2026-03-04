@@ -17,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
+/** REST endpoints for authentication and current-user introspection. */
 public class AuthController {
 
     private final AuthService authService;
@@ -25,11 +26,13 @@ public class AuthController {
         this.authService = authService;
     }
 
+    /** Authenticates user credentials and returns a signed JWT access token. */
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 
+    /** Returns current principal name and authorities extracted from authentication context. */
     @GetMapping("/me")
     public MeResponse me(Authentication authentication) {
         List<String> authorities = authentication.getAuthorities().stream()

@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Service
+/** Handles authentication and JWT token generation. */
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -30,6 +31,12 @@ public class AuthService {
         this.jwtProperties = jwtProperties;
     }
 
+    /**
+     * Authenticates incoming credentials and issues a JWT with aggregated authorities.
+     *
+     * @param request login credentials
+     * @return access token response
+     */
     public LoginResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password())

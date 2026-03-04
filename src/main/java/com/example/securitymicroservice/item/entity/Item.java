@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "item")
+/** Demo item entity secured by permission-based access rules. */
 public class Item {
 
     @Id
@@ -28,6 +29,7 @@ public class Item {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    /** Updates modification timestamp before insert and update operations. */
     @PrePersist
     @PreUpdate
     public void updateTimestamp() {

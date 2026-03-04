@@ -39,8 +39,10 @@ import java.util.Set;
 @Configuration
 @EnableMethodSecurity
 @EnableConfigurationProperties(JwtProperties.class)
+/** Configures stateless JWT security, authentication, and authorization beans. */
 public class SecurityConfig {
 
+    /** Builds HTTP security rules and enables JWT resource server support. */
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -59,6 +61,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /** Maps JWT {@code auth} claim values into {@link GrantedAuthority} objects. */
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
@@ -77,6 +80,7 @@ public class SecurityConfig {
         return converter;
     }
 
+    /** Loads users and expands role + direct permissions into effective authorities. */
     @Bean
     UserDetailsService userDetailsService(AppUserRepository appUserRepository) {
         return username -> appUserRepository.findByUsername(username)
@@ -99,6 +103,7 @@ public class SecurityConfig {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 
+    /** Creates a DAO authentication provider backed by JPA user details. */
     @Bean
     DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService,
                                                         PasswordEncoder passwordEncoder) {
@@ -108,21 +113,25 @@ public class SecurityConfig {
         return provider;
     }
 
+    /** Exposes Spring's configured authentication manager. */
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+    /** Provides BCrypt encoder for password hash verification. */
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /** Creates JWT encoder using the configured HMAC secret. */
     @Bean
     JwtEncoder jwtEncoder(JwtProperties jwtProperties) {
         return new NimbusJwtEncoder(new ImmutableSecret<>(hmacKey(jwtProperties)));
     }
 
+    /** Creates JWT decoder using the configured HMAC secret. */
     @Bean
     JwtDecoder jwtDecoder(JwtProperties jwtProperties) {
         return NimbusJwtDecoder.withSecretKey(hmacKey(jwtProperties)).build();

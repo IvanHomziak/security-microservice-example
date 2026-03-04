@@ -16,6 +16,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 @Transactional
+/** Business service for CRUD operations over items with permission checks. */
 public class ItemService {
 
     private final ItemRepository itemRepository;
@@ -24,6 +25,7 @@ public class ItemService {
         this.itemRepository = itemRepository;
     }
 
+    /** Returns all items available to the caller. */
     @PreAuthorize("hasAuthority('DATA_READ')")
     @Transactional(readOnly = true)
     public List<ItemResponse> list() {
@@ -32,12 +34,14 @@ public class ItemService {
                 .toList();
     }
 
+    /** Returns a single item by identifier. */
     @PreAuthorize("hasAuthority('DATA_READ')")
     @Transactional(readOnly = true)
     public ItemResponse get(Long id) {
         return ItemResponse.fromEntity(findById(id));
     }
 
+    /** Creates a new item. */
     @PreAuthorize("hasAuthority('DATA_CREATE')")
     public ItemResponse create(ItemCreateRequest request) {
         Item item = new Item();
@@ -46,6 +50,7 @@ public class ItemService {
         return ItemResponse.fromEntity(itemRepository.save(item));
     }
 
+    /** Updates an existing item using partial update semantics for name. */
     @PreAuthorize("hasAuthority('DATA_UPDATE')")
     public ItemResponse update(Long id, ItemUpdateRequest request) {
         Item item = findById(id);
@@ -56,6 +61,7 @@ public class ItemService {
         return ItemResponse.fromEntity(itemRepository.save(item));
     }
 
+    /** Deletes an item by identifier. */
     @PreAuthorize("hasAuthority('DATA_DELETE')")
     public void delete(Long id) {
         Item item = findById(id);
