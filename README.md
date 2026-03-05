@@ -5,7 +5,7 @@ A demo security-focused microservice that showcases stateless JWT authentication
 ## Documentation
 
 - [`docs/spring-security-demo-presentation.md`](docs/spring-security-demo-presentation.md) — project-focused security demo presentation.
-- [`docs/spring-security-how-it-works-detailed-presentation-en.md`](docs/spring-security-how-it-works-detailed-presentation-en.md) — detailed English presentation on how Spring Security works.
+- [`docs/spring-security-how-it-works-detailed-presentation-en.md`](docs/spring-security-how-it-works-detailed-presentation-en.md) — How Spring Security works.
 
 ## Project overview
 
