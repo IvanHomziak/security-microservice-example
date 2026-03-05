@@ -5,14 +5,11 @@ import com.example.securitymicroservice.item.dto.ItemCreateRequest;
 import com.example.securitymicroservice.item.dto.ItemResponse;
 import com.example.securitymicroservice.item.dto.ItemUpdateRequest;
 import com.example.securitymicroservice.item.repository.ItemRepository;
+import com.example.securitymicroservice.item.exception.ItemNotFoundException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 @Transactional
@@ -70,6 +67,6 @@ public class ItemService {
 
     private Item findById(Long id) {
         return itemRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Item not found: " + id));
+                .orElseThrow(() -> new ItemNotFoundException(id));
     }
 }
