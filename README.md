@@ -2,6 +2,11 @@
 
 A demo security-focused microservice that showcases stateless JWT authentication, permission-based authorization, MySQL persistence, Flyway migrations, and Docker Compose setup.
 
+## Documentation
+
+- [`docs/spring-security-demo-presentation.md`](docs/spring-security-demo-presentation.md) — project-focused security demo presentation.
+- [`docs/spring-security-how-it-works-detailed-presentation-en.md`](docs/spring-security-how-it-works-detailed-presentation-en.md) — detailed English presentation on how Spring Security works.
+
 ## Project overview
 
 This educational backend service demonstrates a complete baseline authentication and access-control flow:
