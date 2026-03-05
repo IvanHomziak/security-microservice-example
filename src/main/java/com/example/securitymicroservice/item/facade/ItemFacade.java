@@ -6,6 +6,7 @@ import com.example.securitymicroservice.item.dto.ItemUpdateRequest;
 import com.example.securitymicroservice.item.entity.Item;
 import com.example.securitymicroservice.item.mapper.ItemMapper;
 import com.example.securitymicroservice.item.service.ItemService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
