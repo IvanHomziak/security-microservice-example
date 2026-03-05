@@ -1,7 +1,5 @@
 # Presentation: Spring Security Concept in `security-microservice-example`
 
-> Format: markdown slides (each block between `---` can be used as a separate slide in Marp/Slidev/Reveal or for a DEMO meeting).
-
 ---
 
 ## 1) Why this project exists
@@ -13,7 +11,7 @@
 - combining RBAC (roles) + direct user permissions;
 - dual access control: HTTP level + service level.
 
-**What the team gets after knowledge transfer:**
+**Core concepts:**
 - a template for new microservices;
 - shared language between backend/devops/QA regarding access control;
 - a ready foundation for migration to OAuth2/OIDC or integration with IAM.
@@ -160,7 +158,7 @@ Explanation during DEMO:
 
 ---
 
-## 11) What is important to communicate to the team (knowledge transfer)
+## 11) What is important
 
 - Security = **not only login**, but the full access lifecycle.
 - Role does not replace granular permissions.
@@ -204,9 +202,8 @@ This is fine for an educational baseline, but it is important to discuss the roa
 
 ---
 
-## 15) Practical session wrap-up
+## 15) Practical session wrap-up illustrate
 
-After the presentation, the team should be able to:
 - design a role/permission model for a new domain;
 - configure JWT-based stateless security in Spring;
 - apply endpoint + method security;

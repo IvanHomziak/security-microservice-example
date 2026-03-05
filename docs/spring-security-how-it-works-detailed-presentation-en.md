@@ -263,15 +263,6 @@ mockMvc = MockMvcBuilders
 
 ---
 
-## 12) Suggested talk timing (55–75 minutes)
-
-- Fundamentals and architecture: 15–20 min
-- Authentication/authorization internals: 15–20 min
-- Flows (form/basic/jwt/oauth2login): 15–20 min
-- Pitfalls, testing, migration, Q&A: 10–15 min
-
----
-
 ## Final takeaways
 
 1. Think in terms of **filter pipeline + security model objects**.
