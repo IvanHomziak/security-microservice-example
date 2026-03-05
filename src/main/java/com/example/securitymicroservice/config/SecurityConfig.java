@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/actuator/health").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/items/create").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/items/**").hasAuthority(Permission.DATA_READ.name())
                         .requestMatchers(HttpMethod.POST, "/api/items/**").hasAuthority(Permission.DATA_CREATE.name())
                         .requestMatchers(HttpMethod.PUT, "/api/items/**").hasAuthority(Permission.DATA_UPDATE.name())
